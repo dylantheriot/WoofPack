@@ -1,16 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
 
+    // Health
+    public int health = 100;
+    public Slider healthBar;
+
+    // Movement
     public float moveSpeed;
     public float jumpHeight;
     public Transform groundCheck1;
     public LayerMask groundLayer;
-    public bool isGrounded;
-    public float distance;
+    private bool isGrounded;
+    private float distance;
 
+    // Weapon
+    public GameObject projectile;
+    private float timeToShoot = 0.5f;
     // Use this for initialization
     void Start()
     {
@@ -38,13 +47,31 @@ public class PlayerMovement : MonoBehaviour
             GetComponent<SpriteRenderer>().flipX = false;
         }
 
+        timeToShoot += Time.deltaTime;
+        if (Input.GetKeyDown("space") && (timeToShoot >= 0.5f)) {
+            Instantiate(projectile, groundCheck1.position, transform.rotation);
+            timeToShoot = 0;
+        }
+
+        healthBar.value = health;
+
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy")) {
+            health -= 5;
+            // Destroy(gameObject);
+            // Instantiate(explosion, transform.position, Quaternion.identity);
+            // Instantiate(explosionTwo, transform.position, Quaternion.identity);
+        }
     }
 
     bool IsGrounded()
     {
         Vector2 position = transform.position;
         Vector2 direction = Vector2.down;
-        float distance = 3.0f;
+        float distance = 1.0f;
         RaycastHit2D hit = Physics2D.Raycast(position, direction, distance, groundLayer);
         Debug.DrawRay(position, direction, Color.blue, distance);
         if (hit.collider != null)
